@@ -27,18 +27,19 @@ jobs:
         run: dotnet restore ./CI-CD-Example.sln
         
       - name: Build
-        run: dotnet build --configuration Release ./CI-CD-Example.sln
-        
+        run: dotnet build ./CI-CD-Example.sln --configuration Release --no-restore
+
       - name: Publish
-        run: dotnet publish --configuration Release --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }} ./CI-CD-Example.sln
-        
+        run: dotnet publish ./CI-CD-Example.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
+
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ env.AZURE_CREDENTIALS }}
         
-      - name: Deploy to Azure Web App
+      - name: Deployment
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
