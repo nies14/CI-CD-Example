@@ -9,6 +9,7 @@ on:
 env:
   AZURE_WEBAPP_NAME: ci-cd-example
   AZURE_WEBAPP_PACKAGE_PATH: "./publish"
+  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
 
 jobs:
   publish:
@@ -26,14 +27,14 @@ jobs:
         run: dotnet restore ./CI-CD-Example.sln
         
       - name: Build
-        run: dotnet build ./CI-CD-Example.sln --configuration Release --no-restore
-
-      - name: Publish
-        run: dotnet publish ./CI-CD-Example.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
+        run: dotnet build --configuration Release ./CI-CD-Example.sln
         
-      - name: Deployment
+      - name: Publish
+        run: dotnet publish --configuration Release --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }} ./CI-CD-Example.sln
+        
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
